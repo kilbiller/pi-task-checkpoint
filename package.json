@@ -1,6 +1,6 @@
 {
   "name": "pi-task-checkpoint",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Durable task checkpoints and bounded continuation for Pi with local models and limited context",
   "type": "module",
   "engines": {
