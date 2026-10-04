@@ -184,3 +184,25 @@ Tests exercise persistence, revision conflicts, budget calculation, unknown
 usage, checkpoint enforcement across response generation, context restoration,
 and continuation/cancellation/retry limits without a model server. This package
 targets pi 1.0.2+ extension hooks.
+
+## Publishing releases
+
+`.github/workflows/publish.yml` publishes to npm when a GitHub release is
+published. It verifies that the release tag matches `v<package.json version>`,
+runs `npm run check`, and publishes stable releases under `latest` or prereleases
+under `next`.
+
+Configure a GitHub Actions trusted publisher in the npm package settings with
+user `kilbiller`, repository `pi-task-checkpoint`, and workflow filename
+`publish.yml`. Allow direct publishing with `npm publish` and leave the
+environment field blank. The workflow uses OIDC; no npm token secret is needed.
+
+For a stable patch release:
+
+```sh
+npm version patch
+git push origin main --follow-tags
+```
+
+Then publish a GitHub release for the new tag. Each release must use a new npm
+version; `0.1.0` is already published.
