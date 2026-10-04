@@ -1,0 +1,34 @@
+{
+  "name": "pi-task-checkpoint",
+  "version": "0.1.0",
+  "description": "Live context awareness and durable task checkpoints for pi",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node test/state.test.js",
+    "check": "node --check index.js && node --check extension.js && node --check core.js && npm test"
+  },
+  "pi": {
+    "extensions": [
+      "./index.js"
+    ]
+  },
+  "files": [
+    "index.js",
+    "extension.js",
+    "core.js",
+    "README.md"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    }
+  }
+}
