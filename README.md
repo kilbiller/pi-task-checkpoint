@@ -31,7 +31,19 @@ the project, and its continuation guard can request additional model responses.
 
 ## Install
 
-From the repository directory:
+Install from npm:
+
+```sh
+pi install npm:pi-task-checkpoint
+```
+
+Or install from GitHub:
+
+```sh
+pi install git:github.com/kilbiller/pi-task-checkpoint
+```
+
+For a local checkout, run from the repository directory:
 
 ```sh
 pi install .

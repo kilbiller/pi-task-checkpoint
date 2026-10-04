@@ -1,7 +1,7 @@
 {
   "name": "pi-task-checkpoint",
   "version": "0.1.0",
-  "description": "Live context awareness and durable task checkpoints for pi",
+  "description": "Durable task checkpoints and bounded continuation for Pi with local models and limited context",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -30,5 +30,20 @@
     "@earendil-works/pi-coding-agent": {
       "optional": true
     }
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "checkpoints",
+    "local-llm",
+    "context"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kilbiller/pi-task-checkpoint.git"
+  },
+  "homepage": "https://github.com/kilbiller/pi-task-checkpoint#readme",
+  "bugs": {
+    "url": "https://github.com/kilbiller/pi-task-checkpoint/issues"
   }
 }
