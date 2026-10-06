@@ -1,6 +1,6 @@
 import { Type } from "typebox";
 import { randomUUID } from "node:crypto";
-import { budgetFor, checkpointDue, formatBudget, listActiveStates, readState, saveState, taskPath } from "./core.js";
+import { budgetFor, checkpointDue, formatBudget, listPendingStates, readState, saveState, taskPath } from "./core.js";
 
 const MESSAGE_TYPE = "pi-task-checkpoint-live";
 // Keep the persisted binding name so existing explicit session activations restore.
@@ -199,24 +199,25 @@ export function createExtension(pi, agentDir) {
       if (argument === "--fresh" || argument === "fresh") await select("session-" + randomUUID(), ctx, true);
       else if (argument) await select(argument, ctx, true);
       else if (!state) {
-        const active = await listActiveStates(ctx.cwd);
+        const pending = await listPendingStates(ctx.cwd);
+        const describe = task => task.taskId + " [" + task.state.status + "] — " + task.state.objective.replace(/\s+/g, " ");
         if (!ctx.hasUI) {
           const text = ["No checkpoint is saved for the current task.",
-            active.length ? "Active saved tasks:" : "No active saved tasks in this project.",
-            ...active.map(task => "/state " + task.taskId + " — " + task.state.objective.replace(/\s+/g, " ")),
+            pending.length ? "Pending saved tasks:" : "No pending saved tasks in this project.",
+            ...pending.map(task => "/state " + describe(task)),
             "Start fresh: /state --fresh"].join("\n");
           pi.sendMessage({ customType: "pi-task-checkpoint-status", content: text, display: true }, { triggerTurn: false });
           return;
         }
-        const options = active.map(task => task.taskId + " — " + task.state.objective.replace(/\s+/g, " "));
+        const options = pending.map(describe);
         const fresh = "Start fresh";
-        const choice = await ctx.ui.select("Choose an active task or start fresh", [...options, fresh]);
+        const choice = await ctx.ui.select("Choose a pending task or start fresh", [...options, fresh]);
         if (choice === undefined) return;
         if (choice === fresh) await select("session-" + randomUUID(), ctx, true);
         else {
           const index = options.indexOf(choice);
           if (index < 0) return;
-          await select(active[index].taskId, ctx, true);
+          await select(pending[index].taskId, ctx, true);
         }
       }
       const text = formatBudget(await budgetFor(ctx, agentDir)) + "\nTask: " + taskId + "\n" + activePath;

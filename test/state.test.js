@@ -4,7 +4,7 @@ import { access, mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createExtension } from "../extension.js";
-import { budgetFor, checkpointDue, listActiveStates, readState, saveState, taskPath } from "../core.js";
+import { budgetFor, checkpointDue, listPendingStates, readState, saveState, taskPath } from "../core.js";
 
 const fixture = () => ({ objective: "Implement a timeline", status: "active", completed: ["Tick test passes: node --test tick.test.js"], decisions: ["Keep first-shot convention to isolate timing changes"], failedApproaches: ["Immediate lifetime payload credits future damage"], unresolved: ["Reload kill timing"], nextAction: "Add the reload kill test" });
 
@@ -25,17 +25,17 @@ function harness(cwd, agentDir) {
   return { pi, ctx, handlers, tools, commands, entries, messages, activate: () => commands.get("state").handler("--fresh", ctx), setTokens: value => { tokens = value; }, call: (name, params) => tools.get(name).execute("call", params, null, null, ctx) };
 }
 
-test("active state discovery is project-scoped and ignores completed tasks and write artifacts", async t => {
+test("pending state discovery is project-scoped and ignores completed tasks and write artifacts", async t => {
   const { cwd } = await workspace(t);
-  assert.deepEqual(await listActiveStates(cwd), []);
+  assert.deepEqual(await listPendingStates(cwd), []);
   await saveState(taskPath(cwd, "plan-15"), fixture(), 0);
   await saveState(taskPath(cwd, "done"), { ...fixture(), status: "complete" }, 0);
   await saveState(taskPath(cwd, "blocked"), { ...fixture(), status: "blocked" }, 0);
   await writeFile(taskPath(cwd, "plan-15") + ".tmp", "unfinished");
   await mkdir(taskPath(cwd, "directory"));
-  assert.deepEqual((await listActiveStates(cwd)).map(task => task.taskId), ["plan-15"]);
+  assert.deepEqual((await listPendingStates(cwd)).map(task => task.taskId), ["blocked", "plan-15"]);
   await writeFile(taskPath(cwd, "broken"), "not json");
-  await assert.rejects(listActiveStates(cwd), SyntaxError);
+  await assert.rejects(listPendingStates(cwd), SyntaxError);
 });
 
 test("/state chooses an active saved task and restores the selection on restart", async t => {
@@ -45,7 +45,7 @@ test("/state chooses an active saved task and restores the selection on restart"
   let selections = 0;
   h.ctx.ui = { select: async (_title, options) => {
     selections++;
-    assert.deepEqual(options, ["plan-15 — Implement a timeline", "Start fresh"]);
+    assert.deepEqual(options, ["plan-15 [active] — Implement a timeline", "Start fresh"]);
     return options[0];
   }, notify() {} };
   await h.commands.get("state").handler("", h.ctx);
@@ -87,7 +87,7 @@ test("/state offers Start fresh with no saved tasks and provides headless select
   await h.commands.get("state").handler("", h.ctx);
   h.ctx.hasUI = false;
   await h.commands.get("state").handler("", h.ctx);
-  assert.match(h.messages.at(-1).message.content, /No active saved tasks/);
+  assert.match(h.messages.at(-1).message.content, /No pending saved tasks/);
   await saveState(taskPath(cwd, "plan-15"), fixture(), 0);
   await h.commands.get("state").handler("", h.ctx);
   assert.match(h.messages.at(-1).message.content, /\/state plan-15/);

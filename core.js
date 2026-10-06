@@ -35,18 +35,20 @@ export async function readState(path) {
   return state;
 }
 
-export async function listActiveStates(cwd) {
+export async function listPendingStates(cwd) {
   const directory = join(cwd, ".pi", "task-state");
   let files;
   try { files = await readdir(directory, { withFileTypes: true }); }
   catch (error) { if (error.code === "ENOENT") return []; throw error; }
-  const active = [];
+  // Complete tasks are hidden; active and blocked tasks stay selectable so
+  // unfinished work can be resumed with /state <task-id>.
+  const pending = [];
   for (const file of files.sort((a, b) => a.name.localeCompare(b.name))) {
     if (!file.isFile() || !/^[a-z0-9][a-z0-9_-]{0,79}\.json$/.test(file.name)) continue;
     const state = await readState(join(directory, file.name));
-    if (state?.status === "active") active.push({ taskId: file.name.slice(0, -5), state });
+    if (state && state.status !== "complete") pending.push({ taskId: file.name.slice(0, -5), state });
   }
-  return active;
+  return pending;
 }
 
 export async function saveState(path, state, expectedRevision) {

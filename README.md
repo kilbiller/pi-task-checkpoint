@@ -69,8 +69,9 @@ New sessions start disabled, and legacy automatic task bindings do not activate
 it. In a new session, use `/state` to select an existing task explicitly.
 
 When the current task has no saved checkpoint, `/state` lists this project's
-active saved tasks with their objectives and lets you select one or **Start
-fresh**. Cancelling leaves the selection unchanged. Starting fresh selects a
+unfinished saved tasks (status `active` or `blocked`) with their objectives and
+lets you select one or **Start fresh**. Completed tasks stay on disk but are
+hidden from the list. Cancelling leaves the selection unchanged. Starting fresh selects a
 new task ID without writing a checkpoint or changing existing tasks. Without
 an interactive UI, `/state` prints the available `/state <task-id>` commands
 and `/state --fresh`. You can also use `/state --fresh` directly at any time.
